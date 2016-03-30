@@ -4,14 +4,13 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	index "github.com/raintank/raintank-metric/metric_tank/idx"
 	"os"
 	"runtime"
-	"sort"
+	//"sort"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/dgryski/go-trigram"
 
 	"github.com/dgryski/trifles/repl"
 )
@@ -19,8 +18,8 @@ import (
 func main() {
 
 	var docs []string
-	var ids []trigram.DocID
-	var idx trigram.Index
+	var ids []string
+	var idx *index.Idx
 
 	cBrute := func(args []string) error {
 		if idx == nil {
@@ -38,7 +37,7 @@ func main() {
 		}
 
 		t0 := time.Now()
-		for i, s := range docs {
+		for _, s := range docs {
 			var mismatch = false
 		search:
 			for _, pat := range patterns {
@@ -49,28 +48,11 @@ func main() {
 			}
 
 			if !mismatch {
-				ids = append(ids, trigram.DocID(i))
+				ids = append(ids, s)
 			}
 		}
 		fmt.Println("found", len(ids), "documents in", time.Since(t0))
 
-		return nil
-	}
-
-	cFilter := func(args []string) error {
-		if idx == nil {
-			return errors.New("no index loaded")
-		}
-
-		var ts []trigram.T
-		for _, f := range args {
-			ts = trigram.Extract(f, ts)
-		}
-
-		t0 := time.Now()
-		ids = idx.Filter(ids, ts)
-
-		fmt.Println("filtered", len(ids), "documents in", time.Since(t0))
 		return nil
 	}
 
@@ -90,20 +72,28 @@ func main() {
 		}
 
 		scanner := bufio.NewScanner(f)
+		scanner.Split(bufio.ScanWords)
 
 		if len(docs) != 0 {
 			docs = docs[:0]
 		}
 
-		idx = trigram.NewIndex(nil)
+		idx = index.New()
 
 		t0 := time.Now()
 		for scanner.Scan() {
 			d := scanner.Text()
-			docs = append(docs, d)
+			orgId, err := strconv.Atoi(d)
+			if err != nil {
+				fmt.Println("bad orgid input", orgId)
+			}
+			scanner.Scan()
+			key := scanner.Text()
+			docs = append(docs, key)
 
 			// add the trigrams
-			idx.Add(d)
+			id := idx.GetOrAdd(key)
+			idx.AddRef(id)
 		}
 		if err := scanner.Err(); err != nil {
 			fmt.Println("error during scan: ", err)
@@ -118,7 +108,7 @@ func main() {
 
 	cPrint := func(args []string) error {
 		for _, id := range ids {
-			fmt.Printf("%05d: %q\n", id, docs[id])
+			fmt.Println(id)
 		}
 		return nil
 	}
@@ -145,81 +135,84 @@ func main() {
 			return errors.New("no index loaded")
 		}
 
-		var ts []trigram.T
-		for _, f := range args {
-			ts = trigram.Extract(f, ts)
+		if len(args) != 1 {
+			return errors.New("need 1 query arg")
 		}
 
 		t0 := time.Now()
-		ids = idx.QueryTrigrams(ts)
+		// can't set to ids cause it's []Glob
+		res := idx.Match(args[0])
+		for _, r := range res {
+			fmt.Println(r)
+		}
 
-		fmt.Println("found", len(ids), "documents in", time.Since(t0))
+		fmt.Println("found", len(res), "documents in", time.Since(t0))
 
 		return nil
 	}
+	/*
+				cTop := func(args []string) error {
+					var freq []int
+					for _, v := range idx {
+						freq = append(freq, len(v))
+					}
 
-	cTop := func(args []string) error {
-		var freq []int
-		for _, v := range idx {
-			freq = append(freq, len(v))
+					sort.Ints(freq)
+
+					for i := 0; i < 100; i++ {
+						fmt.Println(freq[len(freq)-1-i])
+					}
+					return nil
+				}
+
+			cTrigram := func(args []string) error {
+				if idx == nil {
+					return errors.New("no index loaded")
+				}
+
+				var ts []trigram.T
+				for _, f := range args {
+					ts = trigram.Extract(f, ts)
+				}
+
+				for _, t := range ts {
+					fmt.Printf("%q: %d\n", t, len(idx[t]))
+				}
+
+				return nil
+			}
+
+		cDelete := func(args []string) error {
+			if idx == nil {
+				return errors.New("no index loaded")
+			}
+			if len(args) < 1 {
+				return errors.New("which id?")
+			}
+
+			id, err := strconv.Atoi(args[1])
+			if err != nil {
+				return err
+			}
+
+			t0 := time.Now()
+			idx.Delete(args[0], trigram.DocID(id))
+			fmt.Println("delete took", time.Since(t0))
+
+			return nil
 		}
-
-		sort.Ints(freq)
-
-		for i := 0; i < 100; i++ {
-			fmt.Println(freq[len(freq)-1-i])
-		}
-		return nil
-	}
-
-	cTrigram := func(args []string) error {
-		if idx == nil {
-			return errors.New("no index loaded")
-		}
-
-		var ts []trigram.T
-		for _, f := range args {
-			ts = trigram.Extract(f, ts)
-		}
-
-		for _, t := range ts {
-			fmt.Printf("%q: %d\n", t, len(idx[t]))
-		}
-
-		return nil
-	}
-
-	cDelete := func(args []string) error {
-		if idx == nil {
-			return errors.New("no index loaded")
-		}
-		if len(args) < 1 {
-			return errors.New("which id?")
-		}
-
-		id, err := strconv.Atoi(args[1])
-		if err != nil {
-			return err
-		}
-
-		t0 := time.Now()
-		idx.Delete(args[0], trigram.DocID(id))
-		fmt.Println("delete took", time.Since(t0))
-
-		return nil
-	}
+	*/
 
 	repl.Run("trigram> ",
 		map[string]repl.Cmd{
-			"brute":   cBrute,
-			"delete":  cDelete,
-			"filter":  cFilter,
-			"index":   cIndex,
-			"print":   cPrint,
-			"prune":   cPrune,
-			"search":  cSearch,
-			"top":     cTop,
-			"trigram": cTrigram,
+			"brute": cBrute,
+			//"delete":  cDelete,
+			"index":  cIndex,
+			"print":  cPrint,
+			"prune":  cPrune,
+			"search": cSearch,
+			//	"top":     cTop,
+			//	"trigram": cTrigram,
 		},
 	)
 }
