@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -74,6 +75,10 @@ func main() {
 	}
 
 	cIndex := func(args []string) error {
+		runtime.GC()
+		var ms runtime.MemStats
+		runtime.ReadMemStats(&ms)
+		fmt.Printf("ms.Alloc %d - ms.Sys %d\n", ms.Alloc, ms.Sys)
 		if len(args) < 1 {
 			return errors.New("missing argument")
 		}
@@ -104,7 +109,10 @@ func main() {
 			fmt.Println("error during scan: ", err)
 		}
 
-		fmt.Printf("indexed %d documents in %s\n", len(docs), time.Since(t0))
+		fmt.Printf("indexed %d documents in %s. index len %d \n", len(docs), time.Since(t0), idx.Len())
+		runtime.GC()
+		runtime.ReadMemStats(&ms)
+		fmt.Printf("ms.Alloc %d - ms.Sys %d\n", ms.Alloc, ms.Sys)
 		return nil
 	}
 
