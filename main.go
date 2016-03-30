@@ -185,8 +185,14 @@ func main() {
 		if idx == nil {
 			return errors.New("no index loaded")
 		}
+		if len(args) < 1 {
+			return errors.New("which id?")
+		}
 
-		id, _ := strconv.Atoi(args[1])
+		id, err := strconv.Atoi(args[1])
+		if err != nil {
+			return err
+		}
 
 		t0 := time.Now()
 		idx.Delete(args[0], trigram.DocID(id))
