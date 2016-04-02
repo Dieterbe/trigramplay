@@ -118,7 +118,9 @@ func Prune(pct int) error {
 		return errors.New("no index loaded")
 	}
 	pruned := loadedIndex.Prune(float64(pct) / 100)
-	fmt.Println("pruned", pruned, "at", pct)
+	if !quiet {
+		fmt.Println("pruned", pruned, "at", pct)
+	}
 
 	return nil
 }

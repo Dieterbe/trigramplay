@@ -17,6 +17,7 @@ func search(q string) {
 
 func BenchmarkLiteral(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("litmus.dieter_plaetinck_be.paris.ping.max")
@@ -24,6 +25,7 @@ func BenchmarkLiteral(b *testing.B) {
 }
 func BenchmarkStarFirst(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("*.dieter_plaetinck_be.paris.ping.max")
@@ -31,6 +33,7 @@ func BenchmarkStarFirst(b *testing.B) {
 }
 func BenchmarkStarLast(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("litmus.dieter_plaetinck_be.paris.ping.*")
@@ -38,6 +41,7 @@ func BenchmarkStarLast(b *testing.B) {
 }
 func BenchmarkStarSecondLast(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("litmus.dieter_plaetinck_be.paris.*.ok_state")
@@ -45,6 +49,7 @@ func BenchmarkStarSecondLast(b *testing.B) {
 }
 func BenchmarkStarThirdLast(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("litmus.dieter_plaetinck_be.*.ping.ok_state")
@@ -52,6 +57,7 @@ func BenchmarkStarThirdLast(b *testing.B) {
 }
 func BenchmarkStarLastAndSecondLast(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("litmus.dieter_plaetinck_be.paris.*.*")
@@ -59,6 +65,7 @@ func BenchmarkStarLastAndSecondLast(b *testing.B) {
 }
 func BenchmarkStarSecondLastAndthirdLast(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("litmus.dieter_plaetinck_be.*.*.ok_state")
@@ -66,6 +73,7 @@ func BenchmarkStarSecondLastAndthirdLast(b *testing.B) {
 }
 func BenchmarkStarLastAndSecondLastAndThirdLast(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("litmus.dieter_plaetinck_be.*.*.*")
@@ -74,6 +82,7 @@ func BenchmarkStarLastAndSecondLastAndThirdLast(b *testing.B) {
 
 func BenchmarkStarSecondAndLastAndSecondLastAndThirdLast(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("litmus.*.*.*.*")
@@ -81,6 +90,7 @@ func BenchmarkStarSecondAndLastAndSecondLastAndThirdLast(b *testing.B) {
 }
 func BenchmarkStarEverywhere(b *testing.B) {
 	Index("prod.txt")
+	Prune(20)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		search("*.*.*.*.*")
