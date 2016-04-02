@@ -16,6 +16,7 @@ import (
 var docs []string
 var ids []string
 var loadedIndex *idx.Idx
+var quiet bool
 
 func Brute(patterns []string) error {
 	if loadedIndex == nil {
@@ -45,7 +46,7 @@ func Brute(patterns []string) error {
 	return nil
 }
 
-func Index(fname string, quiet bool) error {
+func Index(fname string) error {
 	var ms runtime.MemStats
 	if !quiet {
 		runtime.GC()
