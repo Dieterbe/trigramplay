@@ -45,11 +45,13 @@ func Brute(patterns []string) error {
 	return nil
 }
 
-func Index(fname string) error {
-	runtime.GC()
+func Index(fname string, quiet bool) error {
 	var ms runtime.MemStats
-	runtime.ReadMemStats(&ms)
-	fmt.Printf("ms.Alloc %d - ms.Sys %d\n", ms.Alloc, ms.Sys)
+	if !quiet {
+		runtime.GC()
+		runtime.ReadMemStats(&ms)
+		fmt.Printf("ms.Alloc %d - ms.Sys %d\n", ms.Alloc, ms.Sys)
+	}
 
 	f, err := os.Open(fname)
 	if err != nil {
@@ -84,10 +86,12 @@ func Index(fname string) error {
 		fmt.Println("error during scan: ", err)
 	}
 
-	fmt.Printf("indexed %d documents in %s. index len %d \n", len(docs), time.Since(t0), loadedIndex.Len())
-	runtime.GC()
-	runtime.ReadMemStats(&ms)
-	fmt.Printf("ms.Alloc %d - ms.Sys %d\n", ms.Alloc, ms.Sys)
+	if !quiet {
+		fmt.Printf("indexed %d documents in %s. index len %d \n", len(docs), time.Since(t0), loadedIndex.Len())
+		runtime.GC()
+		runtime.ReadMemStats(&ms)
+		fmt.Printf("ms.Alloc %d - ms.Sys %d\n", ms.Alloc, ms.Sys)
+	}
 	return nil
 }
 
