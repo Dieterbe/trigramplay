@@ -91,6 +91,16 @@ func Index(fname string) error {
 	return nil
 }
 
+func Get(key string) {
+	id, found := loadedIndex.Get(key)
+	fmt.Printf("id %d - found %t\n", id, found)
+}
+
+func GetOrAdd(key string) {
+	id := loadedIndex.GetOrAdd(key)
+	fmt.Printf("id %d\n", id)
+}
+
 func PrintIds(args []string) error {
 	for _, id := range ids {
 		fmt.Println(id)
@@ -126,16 +136,36 @@ func Search(query string) error {
 
 }
 
-func Top() error {
+func Top(max int) {
 	var freq []int
 	for _, v := range loadedIndex.Pathidx {
 		freq = append(freq, len(v))
 	}
 
 	sort.Ints(freq)
+	if len(freq) < max {
+		max = len(freq)
+	}
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < max; i++ {
 		fmt.Println(freq[len(freq)-1-i])
 	}
-	return nil
+}
+
+func Show() {
+	for t, postList := range loadedIndex.Pathidx {
+		if postList == nil {
+			fmt.Printf("T %s - nil -> all docs. ids:")
+			postList = loadedIndex.Pathidx[0xFFFFFFFF]
+		} else {
+			fmt.Printf("T %s - %d docs. ids:", t, len(postList))
+		}
+		for _, i := range postList {
+			fmt.Printf(" %d", i)
+		}
+		fmt.Println()
+		for _, id := range postList {
+			fmt.Println(" ", loadedIndex.GetById(idx.MetricID(id)))
+		}
+	}
 }

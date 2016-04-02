@@ -35,6 +35,20 @@ func main() {
 		pct, _ := strconv.Atoi(args[0])
 		return trigramplay.Prune(pct)
 	}
+	cGet := func(args []string) error {
+		if len(args) == 0 {
+			return errors.New("missing argument")
+		}
+		trigramplay.Get(args[0])
+		return nil
+	}
+	cGetOrAdd := func(args []string) error {
+		if len(args) == 0 {
+			return errors.New("missing argument")
+		}
+		trigramplay.GetOrAdd(args[0])
+		return nil
+	}
 
 	cSearch := func(args []string) error {
 		if len(args) != 1 {
@@ -44,7 +58,16 @@ func main() {
 
 	}
 	cTop := func(args []string) error {
-		return trigramplay.Top()
+		if len(args) == 0 {
+			return errors.New("missing argument")
+		}
+		max, _ := strconv.Atoi(args[0])
+		trigramplay.Top(max)
+		return nil
+	}
+	cShow := func(args []string) error {
+		trigramplay.Show()
+		return nil
 	}
 
 	/*
@@ -91,11 +114,14 @@ func main() {
 		map[string]repl.Cmd{
 			"brute": cBrute,
 			//"delete":  cDelete,
-			"index":  cIndex,
-			"print":  cPrint,
-			"prune":  cPrune,
-			"search": cSearch,
-			"top":    cTop,
+			"index":    cIndex,
+			"print":    cPrint,
+			"prune":    cPrune,
+			"get":      cGet,
+			"getoradd": cGetOrAdd,
+			"search":   cSearch,
+			"top":      cTop,
+			"show":     cShow,
 			//	"trigram": cTrigram,
 		},
 	)
