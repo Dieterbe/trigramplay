@@ -36,25 +36,28 @@ func main() {
 		return trigramplay.Prune(pct)
 	}
 	cGet := func(args []string) error {
-		if len(args) == 0 {
-			return errors.New("missing argument")
+		if len(args) != 2 {
+			return errors.New("need args: org key")
 		}
-		trigramplay.Get(args[0])
+		org, _ := strconv.Atoi(args[0])
+		trigramplay.Get(org, args[1])
 		return nil
 	}
 	cGetOrAdd := func(args []string) error {
-		if len(args) == 0 {
-			return errors.New("missing argument")
+		if len(args) != 2 {
+			return errors.New("need args: org key")
 		}
-		trigramplay.GetOrAdd(args[0])
+		org, _ := strconv.Atoi(args[0])
+		trigramplay.GetOrAdd(org, args[1])
 		return nil
 	}
 
 	cSearch := func(args []string) error {
-		if len(args) != 1 {
-			return errors.New("need 1 query arg")
+		if len(args) != 2 {
+			return errors.New("need args: org query")
 		}
-		return trigramplay.Search(args[0])
+		org, _ := strconv.Atoi(args[0])
+		return trigramplay.Search(org, args[1])
 
 	}
 	cTop := func(args []string) error {

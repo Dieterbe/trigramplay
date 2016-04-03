@@ -9,7 +9,7 @@ func init() {
 }
 
 func search(q string) {
-	res := loadedIndex.Match(q)
+	res := loadedIndex.Match(7, q)
 	if len(res) < 1 {
 		panic("no matches??")
 	}

@@ -80,8 +80,8 @@ func Index(fname string) error {
 		docs = append(docs, key)
 
 		// add the trigrams
-		id := loadedIndex.GetOrAdd(key)
-		loadedIndex.AddRef(id)
+		id := loadedIndex.GetOrAdd(orgId, key)
+		loadedIndex.AddRef(orgId, id)
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Println("error during scan: ", err)
@@ -96,13 +96,13 @@ func Index(fname string) error {
 	return nil
 }
 
-func Get(key string) {
-	id, found := loadedIndex.Get(key)
+func Get(org int, key string) {
+	id, found := loadedIndex.Get(org, key)
 	fmt.Printf("id %d - found %t\n", id, found)
 }
 
-func GetOrAdd(key string) {
-	id := loadedIndex.GetOrAdd(key)
+func GetOrAdd(org int, key string) {
+	id := loadedIndex.GetOrAdd(org, key)
 	fmt.Printf("id %d\n", id)
 }
 
@@ -125,14 +125,14 @@ func Prune(pct int) error {
 	return nil
 }
 
-func Search(query string) error {
+func Search(org int, query string) error {
 	if loadedIndex == nil {
 		return errors.New("no index loaded")
 	}
 
 	t0 := time.Now()
 	// can't set to ids cause it's []Glob
-	res := loadedIndex.Match(query)
+	res := loadedIndex.Match(org, query)
 	for _, r := range res {
 		fmt.Println(r)
 	}
@@ -165,7 +165,7 @@ func Show() {
 			fmt.Printf("T %s - nil -> all docs. ids:")
 			postList = loadedIndex.Pathidx[0xFFFFFFFF]
 		} else {
-			fmt.Printf("T %s - %d docs. ids:", t, len(postList))
+			fmt.Printf("T %d %s - %d docs. ids:", uint32(t), t, len(postList))
 		}
 		for _, i := range postList {
 			fmt.Printf(" %d", i)
