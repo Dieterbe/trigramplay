@@ -172,7 +172,7 @@ func Show() {
 		}
 		fmt.Println()
 		for _, id := range postList {
-			fmt.Println(" ", loadedIndex.GetById(idx.MetricID(id)))
+			fmt.Println(" ", loadedIndex.Key(idx.MetricID(id)))
 		}
 	}
 }
